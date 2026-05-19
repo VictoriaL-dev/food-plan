@@ -1,0 +1,25 @@
+{% load static %}
+<header>
+    <nav class="navbar navbar-expand-md navbar-light fixed-top navbar__opacity">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'pages:index' %}">
+                <img src="{% static 'assets/img/logo.8d8f24edbb5f.svg' %}" height="55" width="189" alt="Логотип">
+            </a>
+            {% if is_order %}
+                <h3 class="text-secondary mt-2 me-2">Стоимость: 00000₽</h3>
+                <button form="order" type="submit" class="btn shadow-none btn-sm btn-outline-success foodplan_green foodplan__border_green">Оплатить</button>
+            {% elif is_card %}
+                <a class="btn btn-outline-success shadow-none foodplan_green foodplan__border_green me-2">Назад</a>
+            {% else %}
+                {% if user.is_authenticated %}
+                    <a class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green">Выйти</a>
+                {% else %}
+                    <div>
+                        <a href="{% url 'pages:login' %}" class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green me-2">Войти</a>
+                        <a href="{% url 'pages:register' %}" class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green">Регистрация</a>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </nav>
+</header>

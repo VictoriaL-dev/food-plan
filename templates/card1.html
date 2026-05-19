@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Foodplan | Рецепт{% endblock %}
+
+{% block header %}
+{% include "partials/_header.html" %}
+{% endblock %}
+
+{% block content %}
+<main style="margin-top: calc(2rem + 75px);">
+    <section>
+        <div class="container">
+            <div class="row">
+                <div class="col-12 col-md-4 d-flex justify-content-center">
+                    <div class="card foodplan__card_borderless">
+                        <img src="{% static 'assets/img/circle1.png' %}" alt="">
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 d-flex flex-column justify-content-between">
+                    <h2>Название рецепта</h2>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">ингредиент (500г.)</li>
+                        <li class="list-group-item">ингредиент (500г.)</li>
+                        <li class="list-group-item">ингредиент (500г.)</li>
+                        <li class="list-group-item">ингредиент (500г.)</li>
+                        <li class="list-group-item">ингредиент (500г.)</li>
+                    </ul>
+                    <h6>Общая калорийность: 1000 ккал</h6>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}
+
+{% block footer %}
+{% include "partials/_footer.html" %}
+{% endblock %}
