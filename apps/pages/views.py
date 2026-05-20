@@ -23,17 +23,3 @@ def card3(request):
 def make_order(request):
     context = {"is_order": True}
     return render(request, "order.html", context)
-
-
-def show_profile(request):
-    return render(request, "lk.html")
-
-
-def login(request):
-    context = {"is_login": True}
-    return render(request, "auth.html", context)
-
-
-def register(request):
-    context = {"is_registration": True}
-    return render(request, "registration.html", context)
