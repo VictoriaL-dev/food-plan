@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Foodplan | Смена пароля{% endblock %}
+
+{% block header %}
+{% include "partials/_header-auth.html" %}
+{% endblock %}
+
+{% block content %}
+<main style="margin-top: calc(2rem + 85px);">
+    <section>
+        <div class="container">
+            <div class="card p-3 mb-5 foodplan__shadow">
+                <h2 class="text-center"><strong>Смена пароля</strong></h2>
+            </div>
+
+            <div class="card px-5 py-3 d-flex align-items-center foodplan__shadow">
+                <h3 class="m-4 text-center">
+                    Письмо с дальнейшими инструкциями было отправлено вам на почту.
+                </h3>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}
+
+{% block footer %}
+{% include "partials/_footer.html" %}
+{% endblock %}

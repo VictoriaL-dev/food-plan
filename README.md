@@ -10,7 +10,8 @@
 ```text
 .
 ├── apps/               # Папка для Django-приложений
-│   └── pages/          # Приложение для отображения общих страниц
+│   ├── pages/          # Страницы общего назначения
+│   └── users/          # Аунтентификация пользователей и личный кабинет
 ├── food_plan/          # Настройки проекта (settings, urls, wsgi)
 ├── static/             # Глобальные статические файлы (css, assets)
 ├── templates/          # Глобальные HTML шаблоны
@@ -29,8 +30,8 @@ cd food-plan
 #### 2. Создайте и активируйте виртуальное окружение:
 ```bash
 python -m venv venv
-venv\Scripts\activate # on Windows
-source venv/bin/activate # on Linux / macOS
+venv\Scripts\activate # на Windows
+source venv/bin/activate # на Linux / macOS
 ```
 
 #### 3. Установите зависимости:
@@ -52,6 +53,14 @@ POSTGRES_HOST=127.0.0.1
 POSTGRES_PORT=5433
 POSTGRES_DB=db_name
 DATABASE_URL="postgresql://db_user:db_password@127.0.0.1:5432/db_name"
+
+# Email
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=465
+EMAIL_USE_SSL=True
+EMAIL_HOST_USER="example@email.com"
+EMAIL_HOST_PASSWORD="abcdefghijklmnop" # 16-значный пароль приложения
+DEFAULT_FROM_EMAIL="example@email.com"
 ```
 
 #### 5. Запустите базу данных через Docker Compose _(опционально)_:

@@ -5,22 +5,6 @@
             <a class="navbar-brand" href="{% url 'pages:index' %}">
                 <img src="{% static 'assets/img/logo.8d8f24edbb5f.svg' %}" height="55" width="189" alt="">
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse1"
-                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarCollapse1">
-                <ul class="navbar-nav w-100">
-                    <li class="nav-item align-items-center d-md-flex flex-grow-1 justify-content-end">
-                        <button class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green me-2">Подписка</button>
-                        {% if is_login %}
-                            <a href="{% url 'pages:register' %}" class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green">Регистрация</a>
-                        {% elif is_registration %}
-                            <a href="{% url 'pages:login' %}" class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green">Войти</a>
-                        {% endif %}
-                    </li>
-                </ul>
-            </div>
         </div>
     </nav>
 </header>
