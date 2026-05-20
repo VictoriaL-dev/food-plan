@@ -8,15 +8,27 @@
             {% if is_order %}
                 <h3 class="text-secondary mt-2 me-2">Стоимость: 00000₽</h3>
                 <button form="order" type="submit" class="btn shadow-none btn-sm btn-outline-success foodplan_green foodplan__border_green">Оплатить</button>
+
             {% elif is_card %}
                 <a class="btn btn-outline-success shadow-none foodplan_green foodplan__border_green me-2">Назад</a>
+
             {% else %}
                 {% if user.is_authenticated %}
-                    <a class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green">Выйти</a>
+                    <div>
+                        {% if not is_profile %}
+                            <a href="{% url 'users:profile' %}" class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green me-2">Подписка</a>
+                        {% endif %}
+                        <form method="POST" action="{% url 'users:logout' %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green">
+                                Выйти
+                            </button>
+                        </form>
+                    </div>
                 {% else %}
                     <div>
-                        <a href="{% url 'pages:login' %}" class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green me-2">Войти</a>
-                        <a href="{% url 'pages:register' %}" class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green">Регистрация</a>
+                        <a href="{% url 'users:login' %}" class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green me-2">Войти</a>
+                        <a href="{% url 'users:register' %}" class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green">Регистрация</a>
                     </div>
                 {% endif %}
             {% endif %}

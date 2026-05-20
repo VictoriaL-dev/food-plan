@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Foodplan | Смена пароля{% endblock %}
+
+{% block header %}
+{% include "partials/_header-auth.html" %}
+{% endblock %}
+
+{% block content %}
+<main style="margin-top: calc(2rem + 85px);">
+    <section>
+        <div class="container">
+            <div class="card p-3 mb-5 foodplan__shadow">
+                <h2 class="text-center"><strong>Смена пароля</strong></h2>
+            </div>
+
+            <div class="card px-5 py-3 d-flex align-items-center foodplan__shadow">
+                <!-- Form -->
+                <form method="POST" class="w-100" style="max-width: 300px;" novalidate>
+                    {% csrf_token %}
+
+                    <h3 class="mb-4 text-center">Придумайте новый пароль</h3>
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Password -->
+                    <div class="mb-3">
+                        <label class="form-label">Пароль</label>
+                        {{ form.new_password1 }}
+                        {% if form.new_password1.errors %}
+                            <div class="text-danger small mt-1">{{ form.new_password1.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div class="mb-3">
+                        <label class="form-label">Подтверждение пароля</label>
+                        {{ form.new_password2 }}
+                        {% if form.new_password2.errors %}
+                            <div class="text-danger small mt-1">{{ form.new_password2.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Control Button -->
+                    <div class="mb-3">
+                        <button type="submit" class="btn shadow-none w-100 btn-outline-success foodplan_green foodplan__border_green">
+                            Сменить пароль
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}
+
+{% block footer %}
+{% include "partials/_footer.html" %}
+{% endblock %}

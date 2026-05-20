@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Foodplan | Личный кабинет{% endblock %}
+
+{% block header %}
+{% include "partials/_header.html" %}
+{% endblock %}
+
+{% block content %}
+<main style="margin-top: calc(2rem + 85px);">
+    <section>
+        <div class="container">
+            <!-- Form -->
+            <form method="POST" enctype="multipart/form-data" action="{% url 'users:profile' %}" novalidate>
+                {% csrf_token %}
+
+                <div class="row">
+                    <!-- Page Title -->
+                    <div class="card col-12 p-3 mb-5 foodplan__shadow">
+                        <h2 class="text-center"><strong>Личный кабинет</strong></h2>
+                    </div>
+
+                    {% if messages %}
+                        <div class="w-100">
+                            <div class="col-12">
+                                {% for message in messages %}
+                                    <div class="text-center alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show foodplan__shadow mb-4" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Avatar, Name, Logout -->
+                    <div class="card col-12 col-md-2 p-3 mb-3 d-flex flex-column align-items-center foodplan__shadow">
+                        <div class="position-relative">
+                            {% if request.user.avatar %}
+                                <img src="{{ request.user.avatar.url }}" alt="Аватар" width="100" height="100" class="rounded-pill" style="object-fit: cover;">
+                            {% else %}
+                                <img src="{% static 'assets/img/test_avatar.png' %}" alt="Дефолтный аватар" width="100" height="100" class="rounded-pill">
+                            {% endif %}
+
+                            <!-- Add image button -->
+                            <label for="avatar-input" class="badge rounded-circle position-absolute bottom-0 end-0 foodplan__bg_green avatar__plus" style="cursor: pointer;">
+                                <span class="link-dark text-decoration-none align-middle">+</span>
+                            </label>
+                            {{ form.avatar }}
+                        </div>
+
+                        <!-- Name -->
+                        <h3 class="card-title text-center mt-2">{{ request.user.first_name }}</h3>
+
+                        {% if form.avatar.errors %}
+                            {% for error in form.avatar.errors %}
+                                <div class="text-danger small text-center mt-1 fw-bold">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <!-- Logout Button -->
+                        <div class="d-block mt-2">
+                            <button type="submit" form="logout-form" class="btn btn-outline-success shadow-none foodplan_green foodplan__border_green">Выйти</button>
+                        </div>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="card col-12 col-md-10 p-3 mb-3 foodplan__shadow">
+                        <ul class="nav nav-tabs">
+                            <li class="nav-item foodplan__tab-item">
+                                <button type="button" id="tab1" class="btn shadow-none foodplan__tab-button active" data-bs-toggle="tab" data-bs-target="#data">
+                                    Персональные данные
+                                </button>
+                            </li>
+                            <li class="nav-item foodplan__tab-item">
+                                <button type="button" id="tab2" class="btn shadow-none foodplan__tab-button" data-bs-toggle="tab" data-bs-target="#menu">
+                                    Моё меню
+                                </button>
+                            </li>
+                            <li class="nav-item foodplan__tab-item flex-grow-1"></li>
+                        </ul>
+
+                        <div class="tab-content mt-3">
+                            <!-- Personal Data Tab -->
+                            <div class="tab-pane fade show active" id="data">
+                                {% if form.non_field_errors %}
+                                    <div class="alert alert-danger py-2">
+                                        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+
+                                <!-- Name -->
+                                <div class="mb-3">
+                                    <label class="form-label">Имя</label>
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}<div class="text-danger small mt-1">{{ form.first_name.errors.0 }}</div>{% endif %}
+                                </div>
+
+                                <!-- Email -->
+                                <div class="mb-3">
+                                    <label class="form-label">Email</label>
+                                    {{ form.email }}
+                                    {% if form.email.errors %}<div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>{% endif %}
+                                </div>
+
+                                <!-- New Password -->
+                                <div class="mb-3">
+                                    <label class="form-label">Новый пароль</label>
+                                    {{ form.new_password }}
+                                    {% if form.new_password.errors %}
+                                        {% for error in form.new_password.errors %}
+                                            <div class="text-danger small mt-1">{{ error }}</div>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+
+                                <!-- Confirm New Password -->
+                                <div class="mb-3">
+                                    <label class="form-label">Подтверждение пароля</label>
+                                    {{ form.confirm_password }}
+                                    {% if form.confirm_password.errors %}
+                                        {% for error in form.confirm_password.errors %}
+                                            <div class="text-danger small mt-1">{{ error }}</div>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+
+                                <div class="d-block">
+                                    <button type="submit" class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green">
+                                        Сохранить изменения
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Menu Tab -->
+                            <div class="tab-pane fade" id="menu">
+                                {% if has_subscription %}
+                                    <div class="row">
+                                        <div class="col-2">
+                                            <img src="{% static 'assets/img/circle1.png' %}" alt="" class="w-100">
+                                        </div>
+                                        <div class="col-10 col-md-10">
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <h2>Название подписки</h2>
+                                                </div>
+                                                <div class="col-md-12 col-lg-9">
+                                                    <h6>Описание подписки Lorem ipsum dolor sit, amet consectetur adipisicing elit...</h6>
+                                                </div>
+                                                <div class="col-md-12 col-lg-3 text-muted d-flex flex-column justify-content-between">
+                                                    <div class="d-flex flex-row justify-content-between"><small>Персоны: </small><small>3</small></div>
+                                                    <div class="d-flex flex-row justify-content-between"><small>Аллергии: </small><small>нет</small></div>
+                                                    <div class="d-flex flex-row justify-content-between"><small>Калории: </small><small>1400</small></div>
+                                                    <div class="d-flex flex-row justify-content-between"><small>Кол-во приёмов пищи: </small><small>4</small></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <p class="text-muted text-center py-3">У вас пока нет активной подписки.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Logout Form -->
+            <form id="logout-form" action="{% url 'users:logout' %}" method="POST" style="display: none;">
+                {% csrf_token %}
+            </form>
+        </div>
+    </section>
+</main>
+{% endblock %}
+
+{% block footer %}
+{% include "partials/_footer.html" %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById("avatar-input").addEventListener("change", function() {
+        this.form.submit();
+    });
+</script>
+{% endblock %}
