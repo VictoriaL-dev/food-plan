@@ -14,6 +14,6 @@ class IngredientInline(admin.TabularInline):
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('title', 'meal_type', 'menu', 'calories')
-    list_filter = ('meal_type', 'menu')
+    list_display = ('title', 'meal_type', 'menu_type', 'calories')
+    list_filter = ('meal_type', 'menu_type')
     inlines = [IngredientInline]

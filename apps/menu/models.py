@@ -6,6 +6,7 @@ class Menu(models.Model):
         ('classic', 'Классическое'),
         ('low_carb', 'Низкоуглеводное'),
         ('vegetarian', 'Вегетарианское'),
+        ('keto', 'Кето'),
     ]
     name = models.CharField(
         max_length=20,
