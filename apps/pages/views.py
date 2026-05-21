@@ -1,25 +1,29 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from .models import Review
 
 
 def index(request):
     return render(request, "index.html")
 
 
-def card1(request):
-    context = {"is_card": True}
-    return render(request, "card1.html", context)
-
-
-def card2(request):
-    context = {"is_card": True}
-    return render(request, "card2.html", context)
-
-
-def card3(request):
-    context = {"is_card": True}
-    return render(request, "card3.html", context)
-
-
 def make_order(request):
     context = {"is_order": True}
     return render(request, "order.html", context)
+
+
+def reviews_view(request):
+    if request.method == "POST":
+        user_name = request.POST.get("user_name")
+        text = request.POST.get("text")
+        rating = request.POST.get("rating")
+
+        if user_name and text and rating:
+            Review.objects.create(
+                user_name=user_name,
+                text=text,
+                rating=int(rating),
+            )
+            return redirect('pages:reviews')
+
+    reviews = Review.objects.all().order_by("-created_at")
+    return render(request, "reviews.html", {"reviews": reviews})
