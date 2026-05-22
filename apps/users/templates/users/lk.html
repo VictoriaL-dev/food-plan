@@ -134,31 +134,87 @@
                             </div>
 
                             <!-- Menu Tab -->
-                            <div class="tab-pane fade" id="menu">
+                            <div class="tab-pane fade {% if active_tab == 'subscription' %}show active{% endif %}" id="menu" role="tabpanel">
                                 {% if has_subscription %}
                                     <div class="row">
-                                        <div class="col-2">
-                                            <img src="{% static 'assets/img/circle1.png' %}" alt="" class="w-100">
+                                        <div class="col-12 col-md-2 mb-3 text-center">
+                                            {% if order.menu_type.image %}
+                                                <img src="{{ order.menu_type.image.url }}" alt="{{ order.menu_type.name }}" class="w-100 rounded shadow-sm" style="max-width: 150px;">
+                                            {% else %}
+                                                <img src="{% static 'assets/img/circle1.png' %}" alt="" class="w-100" style="max-width: 150px;">
+                                            {% endif %}
                                         </div>
-                                        <div class="col-10 col-md-10">
+
+                                        <div class="col-12 col-md-10">
                                             <div class="row">
-                                                <div class="col-12">
-                                                    <h2>Название подписки</h2>
+                                                <!-- Today's Menu -->
+                                                <div class="col-md-12 col-lg-8">
+                                                    <h2>{{ order.menu_type.name }}</h2>
+                                                    <h5 class="text-success mb-3">Меню на сегодня:</h5>
+
+                                                    <div class="list-group mb-4">
+                                                        {% for meal_type, recipe in today_ration.items %}
+                                                            <a href="{% url 'menu:recipe_detail' recipe.id %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                                                <div>
+                                                                    <span class="badge bg-secondary me-2">
+                                                                        {% if meal_type|lower == "breakfast" %}Завтрак
+                                                                        {% elif meal_type|lower == "lunch" %}Обед
+                                                                        {% elif meal_type|lower == "dinner" %}Ужин
+                                                                        {% elif meal_type|lower == "dessert" %}Десерт
+                                                                        {% else %}{{ meal_type }}
+                                                                        {% endif %}
+                                                                    </span>
+                                                                    {{ recipe.title }}
+                                                                </div>
+                                                                <span class="text-muted small">{{ recipe.calories }} ккал &rarr;</span>
+                                                            </a>
+                                                        {% empty %}
+                                                            <p class="text-muted">На сегодня меню не сформировано.</p>
+                                                        {% endfor %}
+                                                    </div>
                                                 </div>
-                                                <div class="col-md-12 col-lg-9">
-                                                    <h6>Описание подписки Lorem ipsum dolor sit, amet consectetur adipisicing elit...</h6>
-                                                </div>
-                                                <div class="col-md-12 col-lg-3 text-muted d-flex flex-column justify-content-between">
-                                                    <div class="d-flex flex-row justify-content-between"><small>Персоны: </small><small>3</small></div>
-                                                    <div class="d-flex flex-row justify-content-between"><small>Аллергии: </small><small>нет</small></div>
-                                                    <div class="d-flex flex-row justify-content-between"><small>Калории: </small><small>1400</small></div>
-                                                    <div class="d-flex flex-row justify-content-between"><small>Кол-во приёмов пищи: </small><small>4</small></div>
+
+                                                <!-- Order Data -->
+                                                <div class="col-md-12 col-lg-4 text-muted d-flex flex-column justify-content-start gap-2 border-start ps-lg-4">
+                                                    <div class="d-flex flex-row justify-content-between border-bottom pb-1">
+                                                        <small>Персоны: </small>
+                                                        <small class="font-weight-bold text-dark">{{ order.persons_count }}</small>
+                                                    </div>
+                                                    <div class="d-flex flex-row justify-content-between border-bottom pb-1">
+                                                        <small>Аллергии: </small>
+                                                        <small class="font-weight-bold text-dark">
+                                                            {% for allergen in order.excluded_allergens.all %}
+                                                                {{ allergen.name }}{% if not forloop.last %}, {% endif %}
+                                                            {% empty %}
+                                                                нет
+                                                            {% endfor %}
+                                                        </small>
+                                                    </div>
+                                                    <div class="d-flex flex-row justify-content-between border-bottom pb-1">
+                                                        <small>Калории на сегодня: </small>
+                                                        <small class="font-weight-bold text-success">{{ today_calories }} ккал</small>
+                                                    </div>
+                                                    <div class="d-flex flex-row justify-content-between border-bottom pb-1">
+                                                        <small>Приёмов пищи сегодня: </small>
+                                                        <small class="font-weight-bold text-dark">{{ meals_count }}</small>
+                                                    </div>
+                                                    <div class="d-flex flex-row justify-content-between">
+                                                        <small>Срок подписки: </small>
+                                                        <small class="font-weight-bold text-dark">{{ order.duration }} мес.</small>
+                                                    </div>
+                                                    <div class="d-flex flex-row justify-content-between">
+                                                        <small>Стоимость: </small>
+                                                        <small class="font-weight-bold text-dark">{{ order.total_price|floatformat:"0" }} ₽</small>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 {% else %}
-                                    <p class="text-muted text-center py-3">У вас пока нет активной подписки.</p>
+                                    <div class="text-center py-4">
+                                        <p class="text-muted mb-3">У вас пока нет активной подписки.</p>
+                                        <a href="{% url 'orders:order' %}" class="btn btn-outline-success shadow-none foodplan_green foodplan__border_green">Перейти в конструктор меню</a>
+                                    </div>
                                 {% endif %}
                             </div>
                         </div>
@@ -184,5 +240,22 @@
     document.getElementById("avatar-input").addEventListener("change", function() {
         this.form.submit();
     });
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const hash = window.location.hash;
+
+    if (hash) {
+        const targetTabButton = document.querySelector(`[data-bs-target="${hash}"]`);
+
+        if (targetTabButton) {
+            const tabTrigger = new bootstrap.Tab(targetTabButton);
+            tabTrigger.show();
+
+            targetTabButton.scrollIntoView({ behavior: "smooth" });
+        }
+    }
+});
 </script>
 {% endblock %}

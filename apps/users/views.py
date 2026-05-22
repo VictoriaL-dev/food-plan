@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.views.generic import CreateView
@@ -14,8 +16,15 @@ from django.contrib.auth.views import (
     PasswordResetCompleteView
 )
 
-from .forms import RegistrationForm, LoginForm, CustomPasswordResetForm, CustomSetPasswordForm, ProfileEditForm
 from .models import CustomUser
+from apps.orders.models import Order
+from .forms import (
+    RegistrationForm,
+    LoginForm,
+    CustomPasswordResetForm,
+    CustomSetPasswordForm,
+    ProfileEditForm
+)
 
 
 class RegisterView(UserPassesTestMixin, CreateView):
@@ -72,24 +81,93 @@ class CustomLogoutView(LoginRequiredMixin, LogoutView):
     login_url = reverse_lazy("users:login")
 
 
+# class ProfileEditView(LoginRequiredMixin, UpdateView):
+#     """Контроллер Личного кабинета."""
+#
+#     form_class = ProfileEditForm
+#     template_name = "users/lk.html"
+#
+#     def get(self, request, *args, **kwargs):
+#         """Отображает страницу личного кабинета с предзаполненной формой."""
+#         form = self.form_class(instance=request.user)
+#         context = {
+#             "form": form,
+#             "has_subscription": True,
+#             "is_profile": True
+#         }
+#         return render(request, self.template_name, context)
+#
+#     def post(self, request, *args, **kwargs):
+#         """Обрабатывает сохранение данных профиля или загрузку аватарки."""
+#         form = self.form_class(request.POST, request.FILES, instance=request.user)
+#
+#         if form.is_valid():
+#             is_avatar_change = "avatar" in request.FILES
+#             user = form.save()
+#             update_session_auth_hash(request, user)
+#
+#             if is_avatar_change:
+#                 messages.success(request, "Фото профиля успешно обновлено!")
+#             else:
+#                 messages.success(request, "Персональные данные успешно обновлены!")
+#
+#             return redirect("users:profile")
+#
+#         context = {
+#             "form": form,
+#             "has_subscription": True,
+#             "is_profile": True
+#         }
+#         return render(request, self.template_name, context)
+
 class ProfileEditView(LoginRequiredMixin, UpdateView):
-    """Контроллер Личного кабинета."""
+    """Контроллер Личного кабинета с выводом информации о профиле и подписке."""
 
     form_class = ProfileEditForm
     template_name = "users/lk.html"
 
+    def get_object(self, queryset=None):
+        """Возвращает текущего пользователя для UpdateView."""
+        return self.request.user
+
+    def get_order_context(self, user):
+        """Вспомогательный метод для получения данных о подписке и меню на сегодня."""
+        active_order = Order.objects.filter(
+            user=user,
+            is_paid=True,
+            is_active=True
+        ).select_related('menu_type').prefetch_related('excluded_allergens').last()
+
+        if not active_order:
+            return {"has_subscription": False, "order": None, "today_ration": {}, "today_calories": 0, "meals_count": 0}
+
+        today_date = datetime.date.today()
+        ration_data = active_order.get_ration_for_date(today_date)
+        meals_count = len(ration_data["ration"])
+
+        return {
+            "has_subscription": True,
+            "order": active_order,
+            "today_ration": ration_data["ration"],
+            "today_calories": ration_data["calories"],
+            "meals_count": meals_count
+        }
+
     def get(self, request, *args, **kwargs):
-        """Отображает страницу личного кабинета с предзаполненной формой."""
+        """Отображает страницу личного кабинета."""
         form = self.form_class(instance=request.user)
+        order_context = self.get_order_context(request.user)
+
         context = {
             "form": form,
-            "has_subscription": True,
-            "is_profile": True
+            "is_profile": True,
+            "active_tab": "profile",
+            **order_context
         }
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
-        """Обрабатывает сохранение данных профиля или загрузку аватарки."""
+        """Обрабатывает сохранение данных профиля."""
         form = self.form_class(request.POST, request.FILES, instance=request.user)
 
         if form.is_valid():
@@ -104,10 +182,12 @@ class ProfileEditView(LoginRequiredMixin, UpdateView):
 
             return redirect("users:profile")
 
+        order_context = self.get_order_context(request.user)
         context = {
             "form": form,
-            "has_subscription": True,
-            "is_profile": True
+            "is_profile": True,
+            "active_tab": "profile",
+            **order_context
         }
         return render(request, self.template_name, context)
 
