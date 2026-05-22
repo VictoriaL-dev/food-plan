@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Foodplan | Заказ{% endblock %}
+
+{% block header %}
+{% include "partials/_header.html" with is_order=True %}
+{% endblock %}
+
+{% block content %}
+<main style="margin-top: calc(2rem + 85px);">
+    <section>
+        <div class="container">
+            {% if has_active_subscription %}
+                <div class="row justify-content-center my-5">
+                    <div class="col-md-8 text-center py-5 shadow-sm rounded border bg-light">
+                        <div class="mb-4">
+                            <span style="font-size: 4rem;">🎉</span>
+                        </div>
+                        <h2 class="font-weight-bold mb-3">У вас уже есть активная подписка!</h2>
+                        <p class="text-secondary mb-4 px-md-5">
+                            Вы не можете оформить новую подписку, пока действует текущая.
+                            Посмотреть меню на сегодня, список исключенных аллергенов и параметры вашего тарифа можно в личном кабинете.
+                        </p>
+                        <a href="{% url 'users:profile' %}" class="btn shadow-none foodplan_green foodplan__border_green px-4 py-2">
+                            Перейти в личный кабинет
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <form id="order" method="POST" action="">
+                    {% csrf_token %}
+
+                    <h1><strong class="foodplan_green">1 шаг</strong> до первого меню</h1>
+                    <h5 class="text-secondary mb-3">Доступные меню (нужно выбрать одно из них):</h5>
+
+                    <!-- Menu Types -->
+                    <div class="row mb-5">
+                        {% for radio in form.menu_type %}
+                            <div class="col-6 col-md-3">
+                                <label for="{{ radio.id_for_label }}" class="position-relative d-block" style="cursor: pointer;">
+
+                                    {% for menu in menus %}
+                                        {% if menu.id|slugify == radio.data.value|slugify %}
+
+                                            {% if menu.image %}
+                                                <img src="{{ menu.image.url }}" alt="{{ menu.name }}" class="w-100">
+                                            {% else %}
+                                                <img src="{% static 'assets/img/circle1.png' %}" alt="{{ menu.name }}" class="w-100">
+                                            {% endif %}
+
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    <input type="radio"
+                                           name="{{ radio.data.name }}"
+                                           id="{{ radio.id_for_label }}"
+                                           value="{{ radio.data.value }}"
+                                           {% if radio.data.selected %}checked{% endif %}
+                                           class="foodplan_selected d-none">
+
+                                    <div class="img_selected" id="img{{ forloop.counter }}"></div>
+                                </label>
+                                <div class="text-center mt-2 font-weight-bold">{{ radio.choice_label }}</div>
+                            </div>
+                        {% endfor %}
+                        {% if form.menu_type.errors %}
+                            <div class="text-danger small px-3">{{ form.menu_type.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <h2><strong>Выберите подходящий тариф</strong></h2>
+
+                    <table class="table text-center text-truncate mb-5">
+                        <tbody>
+                            <!-- Subscription Period -->
+                            <tr>
+                                <th scope="row" class="text-start align-middle">{{ form.duration.label }}</th>
+                                <td>
+                                    {{ form.duration }}
+                                    {% if form.duration.errors %}<div class="text-danger small text-start">{{ form.duration.errors.0 }}</div>{% endif %}
+                                </td>
+                            </tr>
+                            <!-- Breakfasts -->
+                            <tr>
+                                <th scope="row" class="text-start align-middle">{{ form.has_breakfast.label }}</th>
+                                <td>
+                                    {{ form.has_breakfast }}
+                                    {% if form.has_breakfast.errors %}<div class="text-danger small text-start">{{ form.has_breakfast.errors.0 }}</div>{% endif %}
+                                </td>
+                            </tr>
+                            <!-- Lunches -->
+                            <tr>
+                                <th scope="row" class="text-start align-middle">{{ form.has_lunch.label }}</th>
+                                <td>
+                                    {{ form.has_lunch }}
+                                    {% if form.has_lunch.errors %}<div class="text-danger small text-start">{{ form.has_lunch.errors.0 }}</div>{% endif %}
+                                </td>
+                            </tr>
+                            <!-- Dinners -->
+                            <tr>
+                                <th scope="row" class="text-start align-middle">{{ form.has_dinner.label }}</th>
+                                <td>
+                                    {{ form.has_dinner }}
+                                    {% if form.has_dinner.errors %}<div class="text-danger small text-start">{{ form.has_dinner.errors.0 }}</div>{% endif %}
+                                </td>
+                            </tr>
+                            <!-- Desserts -->
+                            <tr>
+                                <th scope="row" class="text-start align-middle">{{ form.has_dessert.label }}</th>
+                                <td>
+                                    {{ form.has_dessert }}
+                                    {% if form.has_dessert.errors %}<div class="text-danger small text-start">{{ form.has_dessert.errors.0 }}</div>{% endif %}
+                                </td>
+                            </tr>
+                            <!-- Number of Persons -->
+                            <tr>
+                                <th scope="row" class="text-start align-middle">{{ form.persons_count.label }}</th>
+                                <td>
+                                    {{ form.persons_count }}
+                                    {% if form.persons_count.errors %}<div class="text-danger small text-start">{{ form.persons_count.errors.0 }}</div>{% endif %}
+                                </td>
+                            </tr>
+                            <!-- List of Allergies -->
+                            <tr>
+                                <th scope="row" class="text-start align-middle">{{ form.excluded_allergens.label }}</th>
+                                <td>
+                                    {% for checkbox in form.excluded_allergens %}
+                                            <div class="form-check d-flex justify-content-start align-items-center">
+                                                <input type="checkbox"
+                                                       name="{{ checkbox.data.name }}"
+                                                       id="{{ checkbox.id_for_label }}"
+                                                       value="{{ checkbox.data.value }}"
+                                                       {% if checkbox.data.selected %}checked{% endif %}
+                                                       class="form-check-input me-2 foodplan_checked-green">
+                                                <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                                                    {{ checkbox.choice_label }}
+                                                </label>
+                                            </div>
+                                    {% endfor %}
+                                    {% if form.excluded_allergens.errors %}<div class="text-danger small text-start">{{ form.excluded_allergens.errors.0 }}</div>{% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Promocode -->
+                    <div class="card d-flex flex-row align-items-center mb-5 p-3 foodplan__bg_grey">
+                        <label for="{{ form.promocode_code.id_for_label }}" class="form-label me-3 mb-0">{{ form.promocode_code.label }}</label>
+                        <div class="w-100 me-2">
+                            {{ form.promocode_code }}
+                            {% if form.promocode_code.errors %}
+                                <div class="text-danger small mt-1">{{ form.promocode_code.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-flex justify-content-center my-5">
+                        <button type="submit" class="btn shadow-none btn-outline-success foodplan_green foodplan__border_green w-50">
+                            Оформить заказ
+                        </button>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+    </section>
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const durationSelect = document.querySelector("[name='duration']");
+    const personsSelect = document.querySelector("[name='persons_count']");
+    const breakfastSelect = document.querySelector("[name='has_breakfast']");
+    const lunchSelect = document.querySelector("[name='has_lunch']");
+    const dinnerSelect = document.querySelector("[name='has_dinner']");
+    const dessertSelect = document.querySelector("[name='has_dessert']");
+    const promocodeInput = document.querySelector("[name='promocode_code']");
+
+    const priceDisplay = document.getElementById("dynamic-price");
+
+    const pricesPerDay = { breakfast: 200, lunch: 300, dinner: 400, dessert: 100 };
+    const modifiers = { 1: 1.0, 3: 1.6, 6: 1.8, 12: 2.0 };
+
+    let currentDiscount = 0;
+
+    function calculateDynamicPrice() {
+        const duration = durationSelect ? parseInt(durationSelect.value) : 1;
+        const persons = personsSelect ? parseInt(personsSelect.value) : 1;
+
+        let dailyPrice = 0;
+
+        if (breakfastSelect && (breakfastSelect.value === "True" || breakfastSelect.value === "1")) dailyPrice += pricesPerDay.breakfast;
+        if (lunchSelect && (lunchSelect.value === "True" || lunchSelect.value === "1")) dailyPrice += pricesPerDay.lunch;
+        if (dinnerSelect && (dinnerSelect.value === "True" || dinnerSelect.value === "1")) dailyPrice += pricesPerDay.dinner;
+        if (dessertSelect && (dessertSelect.value === "True" || dessertSelect.value === "1")) dailyPrice += pricesPerDay.dessert;
+
+        const monthlyBasePrice = dailyPrice * 30;
+        const modifier = modifiers[duration] || 1.0;
+
+        let totalPrice = monthlyBasePrice * modifier * persons;
+
+        if (currentDiscount > 0) {
+            totalPrice = totalPrice * (100 - currentDiscount) / 100;
+        }
+
+        if (priceDisplay) {
+            priceDisplay.textContent = Math.round(totalPrice).toLocaleString("ru-RU");
+        }
+    }
+
+    function checkPromoCode() {
+        if (!promocodeInput) return;
+        const code = promocodeInput.value.strip ? promocodeInput.value.strip() : promocodeInput.value.trim();
+
+        if (!code) {
+            currentDiscount = 0;
+            removePromoStatus();
+            calculateDynamicPrice();
+            return;
+        }
+
+        fetch(`/orders/check-promocode/?code=${encodeURIComponent(code)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.is_valid) {
+                    currentDiscount = data.discount;
+                    showPromoStatus(`Применен промокод на скидку ${data.discount}%`, "text-success", "is-valid");
+                } else {
+                    currentDiscount = 0;
+                    showPromoStatus(data.error || "Неверный промокод", "text-danger", "is-invalid");
+                }
+                calculateDynamicPrice();
+            })
+            .catch(err => {
+                console.error("Ошибка сети при проверке промокода:", err);
+                currentDiscount = 0;
+                calculateDynamicPrice();
+            });
+    }
+
+    function showPromoStatus(message, textClass, inputClass) {
+        removePromoStatus();
+        if (!promocodeInput) return;
+
+        const statusDiv = document.createElement("div");
+        statusDiv.id = "promo-status-message";
+        statusDiv.className = `${textClass} small mt-1 font-weight-bold`;
+        statusDiv.textContent = message;
+
+        promocodeInput.parentNode.appendChild(statusDiv);
+        promocodeInput.classList.add(inputClass);
+    }
+
+    function removePromoStatus() {
+        const statusMessage = document.getElementById("promo-status-message");
+        if (statusMessage) statusMessage.remove();
+        if (promocodeInput) {
+            promocodeInput.classList.remove("is-valid", "is-invalid");
+        }
+    }
+
+    const elementsToListen = [durationSelect, personsSelect, breakfastSelect, lunchSelect, dinnerSelect, dessertSelect];
+    elementsToListen.forEach(element => {
+        if (element) {
+            element.addEventListener("change", calculateDynamicPrice);
+        }
+    });
+
+    if (promocodeInput) {
+        promocodeInput.addEventListener("input", checkPromoCode);
+    }
+
+    calculateDynamicPrice();
+});
+</script>
+{% endblock %}

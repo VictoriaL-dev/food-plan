@@ -5,12 +5,14 @@
             <a class="navbar-brand" href="{% url 'pages:index' %}">
                 <img src="{% static 'assets/img/logo.8d8f24edbb5f.svg' %}" height="55" width="189" alt="Логотип">
             </a>
-            {% if is_order %}
-                <h3 class="text-secondary mt-2 me-2">Стоимость: 00000₽</h3>
-                <button form="order" type="submit" class="btn shadow-none btn-sm btn-outline-success foodplan_green foodplan__border_green">Оплатить</button>
+            {% if is_order and not has_active_subscription %}
+                <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3">
+                    <h3 class="text-secondary mt-2 me-2">Стоимость: <span id="dynamic-price" class="foodplan_green font-weight-bold">0</span> ₽</h3>
+                    <button form="order" type="submit" class="btn shadow-none btn-sm btn-outline-success foodplan_green foodplan__border_green">Оформить</button>
+                </div>
 
             {% elif is_card %}
-                <a class="btn btn-outline-success shadow-none foodplan_green foodplan__border_green me-2">Назад</a>
+                <a href="{% url 'users:profile' %}#menu" class="btn btn-outline-success shadow-none foodplan_green foodplan__border_green me-2">Назад</a>
 
             {% else %}
                 {% if user.is_authenticated %}
